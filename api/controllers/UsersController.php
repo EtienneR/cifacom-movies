@@ -9,12 +9,12 @@ class UsersController{
 
 	// Display all users
 	public function actionFind(){
-		$data = $this->model->getUsers();
-
 		$pass = F3::get('GET.token');
 		$token = $this->model->getToken($pass);
 
 		if(!empty($token)):
+
+			$data = $this->model->getUsers();
 
 			if (!empty($data)):
 				Api::response(200, $data);

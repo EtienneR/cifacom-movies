@@ -13,9 +13,10 @@ class users{
 	function getToken($pass){
 		$db = $this->db();
 		$db->begin();
-		$data = $db->exec('SELECT id_user, email_user, pass_user FROM users WHERE pass_user = "' . $pass . '"');
-		return $data;
+		$data = $db->exec('SELECT id_user, email_user, pass_user FROM users WHERE pass_user = "' . $pass);
+		return $data;	
 	}
+
 
 	function getUsers(){
 		$db = $this->db();
@@ -27,7 +28,7 @@ class users{
 	function getUser($id_user){
 		$db = $this->db();
 		$db->begin();
-		$data = $db->exec('SELECT id_user, email_user, pass_user FROM users WHERE id_user = ' . $id_user .' LIMIT 1');
+		$data = $db->exec('SELECT id_user, email_user, pass_user FROM users WHERE id_user = "' . $id_user . '" LIMIT 1');
 
 		return $data;
 	}
@@ -36,7 +37,7 @@ class users{
 		$db = $this->db();
 		$db->begin();
 		$data = $db->exec("INSERT INTO users (email_user, pass_user) 
-						   VALUES ('" . $email . "', '" . $pass . "')");
+							VALUES ('" . $email . "', '" . $pass . "')");
 		$db->commit();
 
 		return $data;
