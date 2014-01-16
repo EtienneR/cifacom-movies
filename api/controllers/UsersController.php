@@ -2,35 +2,38 @@
 
 class UsersController{
 
-	private $db;
+	private $model = null;
 	public function __construct(){
-
-		$this->db=new DB\SQL(
-			'mysql:host=localhost;port=3306;dbname=api',
-			'root',
-			''
-		);
-
+		$this->model = new users();
 	}
 
 	// Display all users
 	public function actionFind(){
-		$this->db->begin();
-		$data = $this->db->exec('SELECT * FROM users');
+		$data = $this->model->getUsers();
 
-		if (!empty($data)):
-			Api::response(200, $data);
+		$pass = F3::get('GET.token');
+		$token = $this->model->getToken($pass);
+
+		if(!empty($token)):
+
+			if (!empty($data)):
+				Api::response(200, $data);
+			else:
+				Api::response(204, 'No users');
+			endif;
+
+		elseif(empty($pass)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(204, 'No Content');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
 
-	// Display one movie
+	// Display an user
 	public function actionFindOne(){
 		$id_user = F3::get('PARAMS.id');
 
-		$this->db->begin();
-		$data = $this->db->exec('SELECT * FROM users WHERE id_user = ' . $id_user .' LIMIT 1');
+		$data = $this->model->getUser($id_user);
 
 		if (!empty($data)):
 			Api::response(200, $data);
@@ -47,11 +50,8 @@ class UsersController{
 		if (!filter_var($email, FILTER_VALIDATE_EMAIL)):
 			Api::response(400, 'Bad email');
 		elseif (!empty($email) && !empty($pass)):
-			$this->db->begin();
-			$insert = $this->db->exec("INSERT INTO users (email_user, pass_user) 
-										VALUES ('" . $email . "', '" . $pass . "')");
-			$this->db->commit();
-			Api::response(200, $insert);
+			$this->model->createUser($email, $pass);
+			Api::response(200, 'User created');
 		else:
 			Api::response(400, 'Bad Request');
 		endif;
@@ -59,21 +59,18 @@ class UsersController{
 
 	// Update an user
 	public function actionUpdate(){
-		$id_user   = F3::get('PARAMS.id');
-		$data 	   = Put::get();
+		$id_user = F3::get('PARAMS.id');
+		$data 	 = Put::get();
 
-		$user = $this->db->exec('SELECT * FROM users WHERE id_user = ' . $id_user . ' LIMIT 1');
+		$user = $this->model->getUser($id_user);
 
 		if (!empty($user)):
+
 			if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)):
 				Api::response(400, 'Bad email');
-			elseif (!empty($id) && !empty($data['email']) && !empty($data['pass'])):
-				$this->db->begin();
-				$update = $this->db->exec("UPDATE users 
-											SET email_user = '" . $data['email'] . "', pass_user= '" . $data['pass'] . "' 
-											WHERE id_user = '" . $id_user . "'");
-				$this->db->commit();
-				Api::response(200, $update);
+			elseif (!empty($id_user) && !empty($data['email']) && !empty($data['pass'])):
+				$this->model->updateUser($data['email'], $data['pass'], $id_user);
+				Api::response(200, 'Content updated');
 			else:
 				Api::response(400, 'Bad Request');
 			endif;
@@ -86,15 +83,13 @@ class UsersController{
 	// Delete an user
 	public function actionDelete(){
 		$id_user = F3::get('PARAMS.id');
-
-		$this->db->begin();
-		$query = $this->db->exec('DELETE FROM users WHERE id_user = ' . $id_user . '');
-		$this->db->commit();
+		$query = $this->model->deleteUser($id_user);
 
 		if (!empty($query)):
 			Api::response(200, 'Content deleted');
 		else:
-			Api::response(204, 'No Content');
+			Api::response(404, 'No Content');
 		endif;
 	}
+
 }

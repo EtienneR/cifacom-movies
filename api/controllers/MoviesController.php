@@ -2,35 +2,27 @@
 
 class MoviesController{
 
-	private $db;
+	private $model = null;
 	public function __construct(){
-
-		$this->db=new DB\SQL(
-			'mysql:host=localhost;port=3306;dbname=api',
-			'root',
-			''
-		);
-
+		$this->model = new movies();
 	}
 
 	// Display all movies
 	public function actionFind(){
-		$this->db->begin();
-		$data = $this->db->exec('SELECT * FROM movies');
+		$data = $this->model->getMovies();
 
 		if (!empty($data)):
 			Api::response(200, $data);
 		else:
-			Api::response(204, 'No Content');
+			Api::response(204, 'No movies');
 		endif;
 	}
 
 	// Display one movie
 	public function actionFindOne(){
-		$id_user = F3::get('PARAMS.id');
+		$id_movie = F3::get('PARAMS.id');
 
-		$this->db->begin();
-		$data = $this->db->exec('SELECT * FROM movies WHERE id_movie = ' . $id_user);
+		$data = $this->model->getMovie($id_movie);
 
 		if (!empty($data)):
 			Api::response(200, $data);
@@ -48,11 +40,8 @@ class MoviesController{
 		if (!preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date)):
 			Api::response(400, 'Bad date');
 		elseif (!empty($name) && !empty($author) && !empty($date)):
-			$this->db->begin();
-			$insert = $this->db->exec("INSERT INTO movies (name_movie, author_movie, date_movie) 
-										VALUES ('" . $name . "', '" . $author . "' , '" . $date . "' )");
-			$this->db->commit();
-			Api::response(200, $insert);
+			$this->model->createMovie($name, $author, $date);
+			Api::response(200, 'Movie added');
 		else:
 			Api::response(400, 'Bad Request');
 		endif;
@@ -63,16 +52,12 @@ class MoviesController{
 		$id_movie = F3::get('PARAMS.id');
 		$data 	  = Put::get();
 
-		$movie = $this->db->exec('SELECT * FROM users WHERE id_user = ' . $id);
+		$movie = $this->model->getMovie($id_movie);
 
 		if (!empty($movie)):
-			if (!empty($id) && !empty($data['name']) && !empty($data['author'])):
-				$this->db->begin();
-				$update = $this->db->exec("UPDATE movies 
-											SET name_movie = '" . $data['name'] . "', author_movie= '" . $data['author'] . "' 
-											WHERE id_movie = '" . $id_movie);
-				$this->db->commit();
-				Api::response(200, $update);
+			if (!empty($id_movie) && !empty($data['name']) && !empty($data['author']) && !empty($data['date'])):
+				$this->model->updateMovie($data['name'], $data['author'], $data['date'], $id_movie);
+				Api::response(200, 'Movie updated');
 			else:
 				Api::response(400, 'Bad Request');
 			endif;
@@ -86,14 +71,13 @@ class MoviesController{
 	public function actionDelete(){
 		$id_movie = F3::get('PARAMS.id');
 
-		$this->db->begin();
-		$query = $this->db->exec('DELETE FROM movies WHERE id_movie = ' . $id_movie . '');
-		$this->db->commit();
+		$query = $this->model->deleteMovie($id_movie);
 
 		if (!empty($query)):
-			Api::response(200, 'Content deleted');
+			Api::response(200, 'Movie deleted');
 		else:
-			Api::response(204, 'No Content');
+			Api::response(404, 'No Content');
 		endif;
 	}
+
 }
