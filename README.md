@@ -80,12 +80,15 @@ http://localhost/api/v1/mymovies/liked/1
 ```
 http://localhost/api/v1/mymovies/liked/?token=pass
 ```
+- user (id)
+- movie (id)
 
 ### 14 - POST a movie liked to unliked by an user (update)
 ```
 http://localhost/api/v1/mymovies/like?token=pass
 ```
-
+- user (id)
+- movie (id)
 
 --- MOVIES SEEN CRUD ---
 
@@ -103,11 +106,15 @@ http://localhost/api/v1/mymovies/seen/1
 ```
 http://localhost/api/v1/mymovies/seen/?token=pass
 ```
+- user (id)
+- movie (id)
 
 ### 18 - POST a movie seen to unseen by an user (update)
 ```
 http://localhost/api/v1/mymovies/seen/?token=pass
 ```
+- user (id)
+- movie (id)
 
 
 --- MOVIES WOULD SEE CRUD ---
@@ -126,8 +133,12 @@ http://localhost/api/v1/mymovies/wouldsee/1
 ```
 http://localhost/api/v1/mymovies/wouldsee/?token=pass
 ```
+- user (id)
+- movie (id)
 
 ### 22 - POST a movie would see to not would see by an user (update)
 ```
 http://localhost/api/v1/mymovies/wouldsee/?token=pass
 ```
+- user (id)
+- movie (id)
