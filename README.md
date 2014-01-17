@@ -48,7 +48,7 @@ http://localhost/api/v1/movies/1
 http://localhost/api/v1/movies/
 - name
 - author
-- realisator
+- date
 
 ### 9 - PUT a movie
 ```
@@ -56,7 +56,7 @@ http://localhost/api/v1/movies/
 ```
 - name
 - author
-- realisator
+- date
 
 ### 10 - DELETE a movie
 ```
