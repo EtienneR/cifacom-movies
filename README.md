@@ -15,21 +15,21 @@ http://localhost/api/v1/users/1
 
 ### 3 - POST an user
 ```
-http://localhost/api/v1/users/
+http://localhost/api/v1/users/?token=pass
 ```
 - email
 - pass
 
 ### 4 - PUT an user
 ```
-http://localhost/api/v1/users/
+http://localhost/api/v1/users/?token=pass
 ```
 - email
 - pass
 
 ### 5 - DELETE an user
 ```
-http://localhost/api/v1/users/1
+http://localhost/api/v1/users/1?token=pass
 ```
 
 --- MOVIES CRUD BASIC ---
@@ -45,14 +45,14 @@ http://localhost/api/v1/movies/1
 ```
 
 ### 8 - POST a movie
-http://localhost/api/v1/movies/
+http://localhost/api/v1/movies/?token=pass
 - name
 - author
 - date
 
 ### 9 - PUT a movie
 ```
-http://localhost/api/v1/movies/
+http://localhost/api/v1/movies/?token=pass
 ```
 - name
 - author
@@ -60,7 +60,7 @@ http://localhost/api/v1/movies/
 
 ### 10 - DELETE a movie
 ```
-http://localhost/api/v1/movies/1
+http://localhost/api/v1/movies/1?token=pass
 ```
 
 
