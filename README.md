@@ -78,12 +78,12 @@ http://localhost/api/v1/mymovies/liked/1
 
 ### 13 - POST a movie liked by an user
 ```
-http://localhost/api/v1/mymovies/liked/
+http://localhost/api/v1/mymovies/liked/?token=pass
 ```
 
 ### 14 - POST a movie liked to unliked by an user (update)
 ```
-http://localhost/api/v1/mymovies/like
+http://localhost/api/v1/mymovies/like?token=pass
 ```
 
 
@@ -101,12 +101,12 @@ http://localhost/api/v1/mymovies/seen/1
 
 ### 17 - POST a movie seen by an user
 ```
-http://localhost/api/v1/mymovies/seen/
+http://localhost/api/v1/mymovies/seen/?token=pass
 ```
 
 ### 18 - POST a movie seen to unseen by an user (update)
 ```
-http://localhost/api/v1/mymovies/seen/
+http://localhost/api/v1/mymovies/seen/?token=pass
 ```
 
 
@@ -124,10 +124,10 @@ http://localhost/api/v1/mymovies/wouldsee/1
 
 ### 21 - POST a movie would see by an user
 ```
-http://localhost/api/v1/mymovies/wouldsee/
+http://localhost/api/v1/mymovies/wouldsee/?token=pass
 ```
 
 ### 22 - POST a movie would see to not would see by an user (update)
 ```
-http://localhost/api/v1/mymovies/wouldsee/
+http://localhost/api/v1/mymovies/wouldsee/?token=pass
 ```
