@@ -2,19 +2,19 @@
 
 class MoviesController{
 
-	private $model = null;
 	public function __construct(){
-		$this->model = new movies();
+		$this->model_movies = new movies();
+		$this->model_users = new users();
 	}
 
 	// Display all movies
 	public function actionFind(){
-		$data = $this->model->getMovies();
+		$data = $this->model_movies->getMovies();
 
 		if (!empty($data)):
 			Api::response(200, $data);
 		else:
-			Api::response(204, 'No movies');
+			Api::response(204, 'No movies into the database');
 		endif;
 	}
 
@@ -22,12 +22,12 @@ class MoviesController{
 	public function actionFindOne(){
 		$id_movie = F3::get('PARAMS.id');
 
-		$data = $this->model->getMovie($id_movie);
+		$data = $this->model_movies->getMovie($id_movie);
 
 		if (!empty($data)):
 			Api::response(200, $data);
 		else:
-			Api::response(404, 'Error 404');
+			Api::response(404, 'Movie not found');
 		endif;
 	}
 
@@ -36,14 +36,25 @@ class MoviesController{
 		$name 	= F3::get('POST.name');
 		$author = F3::get('POST.author');
 		$date   = F3::get('POST.date');
+		$token  = F3::get('GET.token');
 
-		if (!preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date)):
-			Api::response(400, 'Bad date');
-		elseif (!empty($name) && !empty($author) && !empty($date)):
-			$this->model->createMovie($name, $author, $date);
-			Api::response(200, 'Movie added');
+		$getToken = $this->model_users->getToken($token);
+
+		if (!empty($getToken)):
+
+			if (!preg_match("/^([0-9]{4})-([0-9]{2})-([0-9]{2})$/", $date)):
+				Api::response(400, 'Bad date, impossible to add a new movie');
+			elseif (!empty($name) && !empty($author) && !empty($date)):
+				$this->model_movies->createMovie($name, $author, $date);
+				Api::response(200, 'Movie added');
+			else:
+				Api::response(400, 'Bad request');
+			endif;
+
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(400, 'Bad Request');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
 
@@ -51,32 +62,53 @@ class MoviesController{
 	public function actionUpdate(){
 		$id_movie = F3::get('PARAMS.id');
 		$data 	  = Put::get();
+		$token    = F3::get('GET.token');
 
-		$movie = $this->model->getMovie($id_movie);
+		$getToken = $this->model_users->getToken($token);
 
-		if (!empty($movie)):
-			if (!empty($id_movie) && !empty($data['name']) && !empty($data['author']) && !empty($data['date'])):
-				$this->model->updateMovie($data['name'], $data['author'], $data['date'], $id_movie);
-				Api::response(200, 'Movie updated');
+		if (!empty($getToken)):
+
+			$movie = $this->model_movies->getMovie($id_movie);
+
+			if (!empty($movie)):
+				if (!empty($id_movie) && !empty($data['name']) && !empty($data['author']) && !empty($data['date'])):
+					$this->model_movies->updateMovie($data['name'], $data['author'], $data['date'], $id_movie);
+					Api::response(200, 'Movie updated');
+				else:
+					Api::response(400, 'Bad Request');
+				endif;
+
 			else:
-				Api::response(400, 'Bad Request');
+				Api::response(404, 'Movie doesn\'t exist');
 			endif;
 
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(404, 'Movie doesn\'t exist');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
 
 	// Delete a movie
 	public function actionDelete(){
 		$id_movie = F3::get('PARAMS.id');
+		$token    = F3::get('GET.token');
 
-		$query = $this->model->deleteMovie($id_movie);
+		$getToken = $this->model_users->getToken($token);
 
-		if (!empty($query)):
-			Api::response(200, 'Movie deleted');
+		if (!empty($getToken)):
+			$query = $this->model_movies->deleteMovie($id_movie);
+
+			if (!empty($query)):
+				Api::response(200, 'Movie deleted');
+			else:
+				Api::response(404, 'Movie doesn\'t exist');
+			endif;	
+
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(404, 'No Content');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
 

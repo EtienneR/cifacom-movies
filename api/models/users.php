@@ -13,7 +13,7 @@ class users{
 	function getToken($pass){
 		$db = $this->db();
 		$db->begin();
-		$data = $db->exec('SELECT id_user, email_user, pass_user FROM users WHERE pass_user = "' . $pass);
+		$data = $db->exec('SELECT id_user, email_user, pass_user FROM users WHERE pass_user = "' . $pass . '"');
 		return $data;	
 	}
 
@@ -44,10 +44,24 @@ class users{
 	}
 
 	function updateUser($email, $pass, $id_user){
+		if(empty($email)):
+			$email = '';
+		else:
+			$email = 'email_user = "'. $email . '", ';
+		endif;
+
+		if(empty($pass)):
+			$pass = '';
+		else:
+			$pass = 'pass_user = "'. $pass . '"';
+		endif;
+
+		$params = $email.$pass;
+
 		$db = $this->db();
 		$db->begin();
 		$data = $db->exec("UPDATE users 
-						   SET email_user = '" . $email . "', pass_user= '" . $pass . "' 
+						   SET " . $params . "
 						   WHERE id_user = " . $id_user);
 		$db->commit();
 

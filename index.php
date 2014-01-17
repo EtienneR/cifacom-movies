@@ -15,5 +15,11 @@ $f3->route('GET /',
 	}
 );
 
+$hive = $f3->hive();
+
+$f3->set('ONERROR',function($f3){
+    $error = F3::get('ERROR');
+    Api::response($error['code'], $error['status']);
+});
 
 $f3->run();

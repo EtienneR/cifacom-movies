@@ -8,20 +8,31 @@ class MyMoviesController{
 		$this->model_users = new users();
 	}
 
-	# LIKE #
-	// Afficher tous les films aimés par l'utilisateur
+
+	// Displaying all movies liked by all users
+	public function actionLikedFind(){
+		$data = $this->model_likes->getUserAction($id_user = '', $action = 'like');
+
+		if (!empty($data)):
+			Api::response(200, $data);
+		else:
+			Api::response(204, 'No movies liked');
+		endif;
+	}
+
+	// Displaying all movies liked by the user
 	public function actionLikedFindOne(){
 		$id_user = F3::get('PARAMS.id');
 
 		$user = $this->model_users->getUser($id_user);
 
 		if (!empty($user)):
-			$data = $this->model_likes->getLikes($id_user);
+			$data = $this->model_likes->getUserAction($id_user, $action = 'like');
 
 			if (!empty($data)):
 				Api::response(200, $data);
 			else:
-				Api::response(204, 'No content liked by this user');
+				Api::response(204, 'No movies liked by this user');
 			endif;
 
 		else:
@@ -30,55 +41,86 @@ class MyMoviesController{
 	}
 
 
-	// Créer un film que l'utilisateur a aimé
+	// Create a movie liked by the the user
 	public function actionLikedCreate(){
-		$id_user  = f3::get('POST.user');
-		$id_movie = f3::get('POST.movie');
+		$id_user  = F3::get('POST.user');
+		$id_movie = F3::get('POST.movie');
+		$token    = F3::get('GET.token');
 
-		if (!empty($id_user) && !empty($id_movie)):
-			$check_like = $this->model_likes->checkLike($id_user, $id_movie);
+		$getToken = $this->model_users->getToken($token);
 
-			if (empty($check_like)):
-				$this->model_likes->createLike($id_user, $id_movie);
-				Api::response(200, 'Content added');
+		if (!empty($getToken)):
+
+			if (!empty($id_user) && !empty($id_movie)):
+				$check_like = $this->model_likes->checkLike($id_user, $id_movie);
+
+				if (empty($check_like)):
+					$this->model_likes->createLike($id_user, $id_movie);
+					Api::response(200, 'Movie added as liked');
+				else:
+					$this->model_likes->updateLike($id_user, $id_movie, $statut = '');
+					Api::response(200, 'Movie updated as liked');
+				endif;
+
 			else:
-				$this->model_likes->updateLike($id_user, $id_movie, $statut = '');
-				Api::response(200, 'Content updated');
+				Api::response(400, 'Bad Request');
 			endif;
 
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(400, 'Bad Request');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
 
-	// Mettre à jour ("supprimer") un film que l'utilisateur a aimé
+	// "Delete" a movie liked by the user
 	public function actionLikedUpdate(){
-		$data = Put::get();
+		$data  = Put::get();
+		$token = F3::get('GET.token');
 
-		if (!empty($data['user']) && !empty($data['movie'])):
-			$this->model_likes->updateLike($data['user'], $data['movie'], $statut = 'delete');
-			Api::response(200, 'Content updated');;
+		$getToken = $this->model_users->getToken($token);
+
+		if (!empty($getToken)):
+
+			if (!empty($data['user']) && !empty($data['movie'])):
+				$this->model_likes->updateLike($data['user'], $data['movie'], $statut = 'delete');
+				Api::response(200, 'Movies updated liked to unliked');;
+			else:
+				Api::response(204, 'No movies');
+			endif;
+
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(204, 'No Content');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
-	# FIN LIKE # 
 
 
-	# A VU # 
-	// Afficher tous les films vus par l'utilisateur
+	// Displaying all see liked by all users
+	public function actionSeeFind(){
+		$data = $this->model_likes->getUserAction($id_user = '', $action = 'see');
+
+		if (!empty($data)):
+			Api::response(200, $data);
+		else:
+			Api::response(204, 'No movies seen');
+		endif;
+	}
+
+	// Displaying all movies see by all users
 	public function actionSeeFindOne(){
 		$id_user = F3::get('PARAMS.id');
 
 		$user = $this->model_users->getUser($id_user);
 
 		if (!empty($user)):
-			$data = $this->model_likes->getLikes($id_user);
+			$data = $this->model_likes->getUserAction($id_user, $action = 'see');
 
-			if (empty($data)):
+			if (!empty($data)):
 				Api::response(200, $data);
 			else:
-				Api::response(204, 'No content seen by this user');
+				Api::response(204, 'No movies seen by this user');
 			endif;
 
 		else:
@@ -86,55 +128,86 @@ class MyMoviesController{
 		endif;
 	}
 
-	// L'utilisateur a vu un film 
+	// Create a movie see by the user
 	public function actionSeeCreate(){
-		$id_user  = f3::get('POST.user');
-		$id_movie = f3::get('POST.movie');
+		$id_user  = F3::get('POST.user');
+		$id_movie = F3::get('POST.movie');
+		$token 	  = F3::get('GET.token');
 
-		if (!empty($id_user) && !empty($id_movie)):
-			$check_like = $this->model_likes->checkLike($id_user, $id_movie);
+		$getToken = $this->model_users->getToken($token);
 
-			if (empty($check_like)):
-				$this->model_likes->createSee($id_user, $id_movie);
-				Api::response(200, 'Content added');
+		if (!empty($getToken)):
+
+			if (!empty($id_user) && !empty($id_movie)):
+				$check_like = $this->model_likes->checkLike($id_user, $id_movie);
+
+				if (empty($check_like)):
+					$this->model_likes->createSee($id_user, $id_movie);
+					Api::response(200, 'Movie added as see');
+				else:
+					$this->model_likes->updateSee($id_user, $id_movie, $statut = '');
+					Api::response(200, 'Movie updated as see');
+				endif;
+
 			else:
-				$this->model_likes->updateSee($id_user, $id_movie, $statut = '');
-				Api::response(200, 'Content updated');
+				Api::response(400, 'Bad Request');
 			endif;
 
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(400, 'Bad Request');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
 
-	// Mettre à jour ("supprimer") un film que l'utilisateur a vu
+	// "Delete" a movie see by the user
 	public function actionSeeUpdate(){
-		$data = Put::get();
+		$data  = Put::get();
+		$token = F3::get('GET.token');
 
-		if (!empty($data['user']) && !empty($data['movie'])):
-			$this->model_likes->updateSee($data['user'], $data['movie'], $statut = 'delete');
-			Api::response(200, 'Content updated');;
+		$getToken = $this->model_users->getToken($token);
+
+		if (!empty($getToken)):
+
+			if (!empty($data['user']) && !empty($data['movie'])):
+				$this->model_likes->updateSee($data['user'], $data['movie'], $statut = 'delete');
+				Api::response(200, 'Movie updated see to unsee this user');;
+			else:
+				Api::response(204, 'No movies');
+			endif;
+
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(204, 'No Content');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
-	# FIN A VU # 
 
 
-	# VOUDRAIT VOIR # 
-	// Afficher tous les films que l'utilisateur voudrait voir
-	public function actionWould_seeFindOne(){
+	// Displaying all movies that users would see
+	public function actionWouldSeeFind(){
+		$data = $this->model_likes->getUserAction($id_user = '', $action = 'would_see');
+
+		if (!empty($data)):
+			Api::response(200, $data);
+		else:
+			Api::response(204, 'No movies');
+		endif;
+	}
+
+	// Displaying all movies that the user would see
+	public function actionWouldSeeFindOne(){
 		$id_user = F3::get('PARAMS.id');
 
 		$user = $this->model_users->getUser($id_user);
 
 		if (!empty($user)):
-			$data = $this->model_likes->getWouldSee($id_user);
+			$data = $this->model_likes->getUserAction($id_user, $action = 'would_see');
 
 			if (!empty($data)):
 				Api::response(200, $data);
 			else:
-				Api::response(204, 'No content would see by this user');
+				Api::response(204, 'No movies would see by this user');
 			endif;
 
 		else:
@@ -142,39 +215,59 @@ class MyMoviesController{
 		endif;
 	}
 
-	// Créer un film que l'utilisateur voudrait voir
-	public function actionWould_seeCreate(){
-		$id_user  = f3::get('POST.user');
-		$id_movie = f3::get('POST.movie');
+	// Creating a movie that the user would see
+	public function actionWouldSeeCreate(){
+		$id_user  = F3::get('POST.user');
+		$id_movie = F3::get('POST.movie');
+		$token    = F3::get('GET.token');
 
-		if (!empty($id_user) && !empty($id_movie)):
-			$check_like = $this->model_likes->checkLike($id_user, $id_movie);
-			
-			if (empty($check_like)):
-				$this->model_likes->createWouldSee($id_user, $id_movie);
-				Api::response(200, 'Content added');
-			else:
-				$this->model_likes->updateWouldSee($id_user, $id_movie, $statut = '');
-				Api::response(200, 'Content updated');
+		$getToken = $this->model_users->getToken($token);
+
+		if (!empty($getToken)):
+
+			if (!empty($id_user) && !empty($id_movie)):
+				$check_like = $this->model_likes->checkLike($id_user, $id_movie);
 				
+				if (empty($check_like)):
+					$this->model_likes->createWouldSee($id_user, $id_movie);
+					Api::response(200, 'Movie would see added');
+				else:
+					$this->model_likes->updateWouldSee($id_user, $id_movie, $statut = '');
+					Api::response(200, 'Movie would see updated');
+				endif;
+
+			else:
+				Api::response(400, 'Bad Request');
 			endif;
 
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(400, 'Bad Request');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
 
-	// Mettre à jour ("supprimer") un film que l'utilisateur voudrait voir
-	public function actionWould_seeUpdate(){
-		$data = Put::get();
+	// "Delete" a movie that the user would see
+	public function actionWouldSeeUpdate(){
+		$data  = Put::get();
+		$token = F3::get('GET.token');
 
-		if (!empty($data['user']) && !empty($data['movie'])):
-			$this->model_likes->updateWouldSee($data['user'], $data['movie'], $statut = 'delete');
-			Api::response(200, 'Content updated');;
+		$getToken = $this->model_users->getToken($token);
+
+		if (!empty($getToken)):
+
+			if (!empty($data['user']) && !empty($data['movie'])):
+				$this->model_likes->updateWouldSee($data['user'], $data['movie'], $statut = 'delete');
+				Api::response(200, 'Movie updated would see to no would see');;
+			else:
+				Api::response(204, 'No movie');
+			endif;
+
+		elseif (empty($token)):
+			Api::response(401, 'Hum... you need a token');
 		else:
-			Api::response(204, 'No Content');
+			Api::response(403, 'Invalid token');
 		endif;
 	}
-	# FIN VOUDRAIT VOIR # 
 
 }
